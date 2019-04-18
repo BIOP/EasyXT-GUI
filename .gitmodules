@@ -1,0 +1,3 @@
+[submodule "EasyXT"]
+	path = EasyXT
+	url = https://github.com/PTBIOP/EasyXT.git
