@@ -520,7 +520,7 @@ for i=1:numel(panels)
 end
 data
 % Save this somewhere
-[FileName,PathName,FilterIndex] = uiputfile('settings.m','Save Settings');
+[FileName,PathName,FilterIndex] = uiputfile('saved-settings.m','Save Settings');
 save([PathName FileName],'data');
 end
 
