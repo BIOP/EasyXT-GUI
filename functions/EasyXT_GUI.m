@@ -690,16 +690,12 @@ end
 nResults = numel( results );
 for k = 1:nResults
     result = results{k};
-    
+    sheetName = [];
+
     % Append Image name as column
     result.Image = repmat({fileName}, size(result,1),1);
     
-    if ~isempty(result.Properties.UserData)      
-        % Get desired file name from properties
-        resultsName = [result.Properties.UserData '.xlsx'];
-    else
-        resultsName = [funcName '-analysis.xlsx'];
-    end
+    resultsName = [funcName '-analysis.xlsx'];
     
     % Try and find this file and see if we need to append or not
     if is_append
@@ -712,16 +708,38 @@ for k = 1:nResults
     
     % If it exists, load the existing data
     if exist(filePath, 'file') == 2 && is_append
-        % Read In the data
-        data = readtable(filePath, 'Sheet');
+        % Read in the data
+        if ~isempty(result.Properties.UserData)
+            % Get desired file name from properties
+            sheetName = result.Properties.UserData;
+            % This does not work if the sheet does not exist, which happens
+            % the first time the file is created
+            % Check that it exists first
+            [name sheetNames] = xlsfinfo(filePath);
+            if any(ismember(sheetNames, sheetName))
+                data = readtable(filePath, 'Sheet', sheetName);
+            else
+                data = table;
+            end
+                
+        else
+            % I don't know how it deals with sheets, but if the name is not
+            % made we should create multiple shees, but how to check which
+            % is which?
+            data = readtable(filePath);
+        end
     else
+        % This is the first time
         data = table;
     end
     
-    % Append file Name here
     data = [data; result];
-    writetable(data,filePath);
     
+    if ~isempty(sheetName)
+        writetable(data,filePath, 'Sheet', sheetName);
+    else
+        writetable(data,filePath);
+    end
 end
 end
 
