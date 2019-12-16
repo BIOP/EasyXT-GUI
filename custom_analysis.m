@@ -33,13 +33,12 @@ function [results] = custom_analysis( eXT, analyseAll )
     
     % Add table name
     result.Properties.UserData = 'My_Table_Name';
-    result2 = result
+    
+    % You can add a second table easily, here we just duplicate it
+    result2 = result;
     result.Properties.UserData = 'My_Second_Table';
     
     results = {result, result2};
-    
-    %results{2} = new_results'
-    %names{2} = "New Name";
-    
-    
+
+        
 end
