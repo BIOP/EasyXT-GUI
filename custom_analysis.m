@@ -36,7 +36,7 @@ function [results] = custom_analysis( eXT, analyseAll )
     
     % You can add a second table easily, here we just duplicate it
     result2 = result;
-    result.Properties.UserData = 'My_Second_Table';
+    result2.Properties.UserData = 'My_Second_Table';
     
     results = {result, result2};
 

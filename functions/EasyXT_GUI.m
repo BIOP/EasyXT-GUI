@@ -666,7 +666,7 @@ global X;
 global analysis_function;
 
 fileDir =[];
-data = [];
+
 [fileDir fileName ext] = X.GetCurrentFileName();
 
 nChan = X.GetSize('C');
@@ -691,7 +691,7 @@ nResults = numel( results );
 for k = 1:nResults
     result = results{k};
     sheetName = [];
-
+    data = [];
     % Append Image name as column
     result.Image = repmat({fileName}, size(result,1),1);
     
@@ -703,31 +703,26 @@ for k = 1:nResults
     else
         file = [ '/' fileName '-' resultsName ];
     end
-    
-    filePath = [fileDir file];
+    filePath = [fileDir file]; 
+
+    if ~isempty(result.Properties.UserData)
+        sheetName = result.Properties.UserData;
+    end
     
     % If it exists, load the existing data
     if exist(filePath, 'file') == 2 && is_append
         % Read in the data
-        if ~isempty(result.Properties.UserData)
             % Get desired file name from properties
-            sheetName = result.Properties.UserData;
             % This does not work if the sheet does not exist, which happens
             % the first time the file is created
             % Check that it exists first
+            
             [name sheetNames] = xlsfinfo(filePath);
             if any(ismember(sheetNames, sheetName))
                 data = readtable(filePath, 'Sheet', sheetName);
             else
                 data = table;
             end
-                
-        else
-            % I don't know how it deals with sheets, but if the name is not
-            % made we should create multiple shees, but how to check which
-            % is which?
-            data = readtable(filePath);
-        end
     else
         % This is the first time
         data = table;
