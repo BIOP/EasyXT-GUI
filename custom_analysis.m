@@ -1,4 +1,4 @@
-function result = custom_analysis( eXT, analyseAll )
+function [results] = custom_analysis( eXT, analyseAll )
     %% This method stub should be written by the user. 
 	%  The user recceives a handle to EasyXT (eXT) through which 
 	%  they can access all the objects from the Imaris Scene and compute
@@ -30,5 +30,16 @@ function result = custom_analysis( eXT, analyseAll )
     end
     
     result.nSpots = nSpots;
+    
+    % Add table name
+    result.Properties.UserData = 'My_Table_Name';
+    result2 = result
+    result.Properties.UserData = 'My_Second_Table';
+    
+    results = {result, result2};
+    
+    %results{2} = new_results'
+    %names{2} = "New Name";
+    
     
 end

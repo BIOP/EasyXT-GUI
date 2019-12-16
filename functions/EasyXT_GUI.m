@@ -667,7 +667,7 @@ global analysis_function;
 
 fileDir =[];
 data = [];
-[dir filename ext] = X.GetCurrentFileName();
+[fileDir fileName ext] = X.GetCurrentFileName();
 
 nChan = X.GetSize('C');
 
@@ -675,43 +675,54 @@ nChan = X.GetSize('C');
 funcData = functions( analysis_function);
 funcName = funcData.function;
 
-% Analysis file
-if (nargin == 1)
-    fileDir = varargin{1};
-    
-else
-    fileDir = dir;
-end
-
 is_append = (get(findobj('Tag', 'is_append'),'Value'));
-if is_append
-    file = ['/' funcName '-analysis.csv'];
-else
-    file = ['/' filename '.csv'];
+
+
+
+results = analysis_function(X, @detectAll);
+
+
+% Compatibility. If it is just one result, make it into a cell array
+if istable( results )
+    results = {results};
+end
+
+nResults = numel( results );
+for k = 1:nResults
+    result = results{k};
+    
+    % Append Image name as column
+    result.Image = repmat({fileName}, size(result,1),1);
+    
+    if ~isempty(result.Properties.UserData)      
+        % Get desired file name from properties
+        resultsName = [result.Properties.UserData '.xlsx'];
+    else
+        resultsName = [funcName '-analysis.xlsx'];
+    end
+    
+    % Try and find this file and see if we need to append or not
+    if is_append
+        file = [ '/' resultsName ];
+    else
+        file = [ '/' fileName '-' resultsName ];
+    end
+    
+    filePath = [fileDir file];
+    
+    % If it exists, load the existing data
+    if exist(filePath, 'file') == 2 && is_append
+        % Read In the data
+        data = readtable(filePath, 'Sheet');
+    else
+        data = table;
+    end
+    
+    % Append file Name here
+    data = [data; result];
+    writetable(data,filePath);
     
 end
-
-filePath = [fileDir file];
-
-if exist(filePath, 'file') == 2 && is_append
-    % Read In the data
-    data = readtable(filePath, 'Delimiter' ,',');
-else
-    data = table;
-end
-
-
-result = analysis_function(X, @detectAll);
-
-result.Image = repmat({filename}, size(result,1),1);
-
-% Append file Name here
-data
-result
-data = [data; result]
-writetable(data,filePath, 'Delimiter' ,',');
-
-
 end
 
 % Helps match surface names
