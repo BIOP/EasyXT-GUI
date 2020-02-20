@@ -661,7 +661,7 @@ for i = 1:nChan
 end
 end
 
-function analyzeImage()
+function analyzeImage(varargin)
 global X;
 global analysis_function;
 

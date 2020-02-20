@@ -31,4 +31,18 @@ function result = custom_analysis( eXT, analyseAll )
     
     result.nSpots = nSpots;
     
+    % A More detailed example showing how to get the mean intensity for
+    % each spot in a given channel
+    result = table();
+    
+    if nSpots > 0
+        spot = eXT.GetObject('Type', 'Spots', 'Number', 1);
+        stats = eXT.GetSelectedStatistics(spot, 'Intensity Mean', 'Channel', 3);
+        % Strings should be as cell arrays. It's a Matlab thing, I think
+        result.SpotID = stats.ids;
+        result.Ch3Mean = stats.values;
+    end
+    
+    
+    
 end
