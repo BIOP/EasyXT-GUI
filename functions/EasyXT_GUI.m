@@ -736,6 +736,7 @@ for k = 1:nResults
         writetable(data,filePath);
     end
 end
+fprintf('Done for %s\n', fileName)
 end
 
 % Helps match surface names

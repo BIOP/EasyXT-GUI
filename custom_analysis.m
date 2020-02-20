@@ -32,13 +32,26 @@ function [results] = custom_analysis( eXT, analyseAll )
     result.nSpots = nSpots;
     
     % Add table name
-    result.Properties.UserData = 'My_Table_Name';
+    result.Properties.UserData = 'Global_Results';
     
-    % You can add a second table easily, here we just duplicate it
-    result2 = result;
-    result2.Properties.UserData = 'My_Second_Table';
+    % You can add a second table easily, here we get the intensity for each
+    % spot
+    result2 = table;
+    result2.Properties.UserData = 'Detailed_Results_Table';
+
+    if nSpots > 0
+        spot = eXT.GetObject('Type', 'Spots', 'Number', 1);
+        stats = eXT.GetSelectedStatistics(spot, 'Intensity Mean');
+        % Strings should be as cell arrays. It's a Matlab thing, I think
+        result2.ids = stats.ids;
+        result2.IntensityMean = stats.values;
+        result2.Channel = cell2mat(stats.factors(:,2));
+    end
     
     results = {result, result2};
-
+    
+    % Show results before exiting
+    results{1}
+    results{2}
         
 end
