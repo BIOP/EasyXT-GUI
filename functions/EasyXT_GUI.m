@@ -666,8 +666,8 @@ global X;
 global analysis_function;
 
 fileDir =[];
-data = [];
-[dir filename ext] = X.GetCurrentFileName();
+
+[fileDir fileName ext] = X.GetCurrentFileName();
 
 nChan = X.GetSize('C');
 
@@ -675,43 +675,68 @@ nChan = X.GetSize('C');
 funcData = functions( analysis_function);
 funcName = funcData.function;
 
-% Analysis file
-if (nargin == 1)
-    fileDir = varargin{1};
-    
-else
-    fileDir = dir;
-end
-
 is_append = (get(findobj('Tag', 'is_append'),'Value'));
-if is_append
-    file = ['/' funcName '-analysis.csv'];
-else
-    file = ['/' filename '.csv'];
+
+
+
+results = analysis_function(X, @detectAll);
+
+
+% Compatibility. If it is just one result, make it into a cell array
+if istable( results )
+    results = {results};
+end
+
+nResults = numel( results );
+for k = 1:nResults
+    result = results{k};
+    sheetName = [];
+    data = [];
+    % Append Image name as column
+    result.Image = repmat({fileName}, size(result,1),1);
     
+    resultsName = [funcName '-analysis.xlsx'];
+    
+    % Try and find this file and see if we need to append or not
+    if is_append
+        file = [ '/' resultsName ];
+    else
+        file = [ '/' fileName '-' resultsName ];
+    end
+    filePath = [fileDir file]; 
+
+    if ~isempty(result.Properties.UserData)
+        sheetName = result.Properties.UserData;
+    end
+    
+    % If it exists, load the existing data
+    if exist(filePath, 'file') == 2 && is_append
+        % Read in the data
+            % Get desired file name from properties
+            % This does not work if the sheet does not exist, which happens
+            % the first time the file is created
+            % Check that it exists first
+            
+            [name sheetNames] = xlsfinfo(filePath);
+            if any(ismember(sheetNames, sheetName))
+                data = readtable(filePath, 'Sheet', sheetName);
+            else
+                data = table;
+            end
+    else
+        % This is the first time
+        data = table;
+    end
+    
+    data = [data; result];
+    
+    if ~isempty(sheetName)
+        writetable(data,filePath, 'Sheet', sheetName);
+    else
+        writetable(data,filePath);
+    end
 end
-
-filePath = [fileDir file];
-
-if exist(filePath, 'file') == 2 && is_append
-    % Read In the data
-    data = readtable(filePath, 'Delimiter' ,',');
-else
-    data = table;
-end
-
-
-result = analysis_function(X, @detectAll);
-
-result.Image = repmat({filename}, size(result,1),1);
-
-% Append file Name here
-data
-result
-data = [data; result]
-writetable(data,filePath, 'Delimiter' ,',');
-
-
+fprintf('Done for %s\n', fileName)
 end
 
 % Helps match surface names
